@@ -1,0 +1,103 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
+    <title>Babylon - Getting Started</title>
+    <!--- Link to the last version of BabylonJS --->
+    <script src="source\Oimo.js"></script>
+    <script src="source\ammo.js"></script>
+    <script src="source\babylon.js"></script>
+    <script src="source\babylonjs.loaders.js"></script>
+    <script src="source\babylonjs.materials.min.js"></script>
+    <script src="source\babylonjs.postProcess.min.js"></script>
+    <script src="source\babylonjs.proceduralTextures.min.js"></script>
+    <script src="source\babylonjs.serializers.min.js"></script>
+    <script src="source\cannon.js"></script>
+    <script src="source\dat.gui.min.js"></script>
+    <script src="source\earcut.min.js"></script>
+    <script src="source\gltf_validator.js"></script>
+    <script src="source\pep.min.js"></script>
+    <script src="source\babylon.inspector.bundle.js"></script>
+    <script src="source\babylon.gui.min.js"></script>
+
+    <style>
+        html, body {
+            overflow: hidden;
+            width   : 100%;
+            height  : 100%;
+            margin  : 0;
+            padding : 0;
+        }
+
+        #renderCanvas {
+            width   : 100%;
+            height  : 100%;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        //'DOMcontentLoaded':to be sure that the whole DOM is loaded before doing anything else 前三部曲
+        window.addEventListener('DOMContentLoaded', function(){
+
+            // get the canvas DOM element
+            var canvas = document.getElementById('renderCanvas');
+
+            // load the 3D engine
+            var engine = new BABYLON.Engine(canvas, true);
+
+            // createScene function that creates and return the scene
+
+            var createScene = function () {
+                //Set arrays for positions and indices
+                var eyes = new BABYLON.Mesh("eyes", scene); 
+                var local_origin = BABYLON.MeshBuilder.CreateBox("local_origin", { size: 1 }, scene);
+                local_origin.position = new BABYLON.Vector3(-0.5, 0, 0);
+                local_origin.isVisible = false;
+                eyes.parent = local_origin;
+                var positions = [
+                    0, 0.3, -0.15, 0, 0.3, -0.34, 0, 0.4, -0.34, 
+                    0, 0.3, -0.15, 0, 0.4, -0.34, 0, 0.4, -0.15,
+                    0, 0.3, -0.34, 0, 0.4, -0.34, 0, 0.4, -0.44,
+                    0, 0.3, -0.34, 0, 0.3, -0.44, 0, 0.4, -0.44,
+                    0, 0.3, -0.44, 0, 0.4, -0.44, 0, 0.4, -0.64,
+                    0, 0.3, -0.44, 0, 0.4, -0.64, 0, 0.3, -0.64, 
+                    0, 0.3, 0.15, 0, 0.3, 0.34, 0, 0.4, 0.34, 
+                    0, 0.3, 0.15, 0, 0.4, 0.34, 0, 0.4, 0.15,
+                    0, 0.3, 0.34, 0, 0.4, 0.34, 0, 0.4, 0.44,
+                    0, 0.3, 0.34, 0, 0.3, 0.44, 0, 0.4, 0.44,
+                    0, 0.3, 0.44, 0, 0.4, 0.44, 0, 0.4, 0.64,
+                    0, 0.3, 0.44, 0, 0.4, 0.64, 0, 0.3, 0.64
+                    ]; 
+                var colors = [1, 1, 1, 1, 1, 1, 1, 1, 0.93, 0.51, 0.93, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.93, 0.51, 0.93, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+                var indices = [];
+                var i = 0; 
+                for(; i * 3 < positions.length; i+=3){
+                    indices.push(i/3);
+                }
+                var vertexData = new BABYLON.VertexData(); 
+                vertexData.positions = positions; 
+                vertexData.colors = colors;
+                vertexData.indices = indices;
+                vertexData.applyToMesh(eyes);
+
+            return scene;
+
+            };
+            // call the createScene function           后三部曲
+            var scene = createScene();
+
+            // run the render loop
+            engine.runRenderLoop(function(){
+                scene.render();
+            });
+
+            // the canvas/window resize event handler
+            window.addEventListener('resize', function(){
+                engine.resize();
+            });
+        });
+    </script>
+</body>
+</html>

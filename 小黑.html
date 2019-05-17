@@ -1,0 +1,157 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
+    <title>Babylon - Getting Started</title>
+    <script src="source\babylon.js"></script>
+    <!-- <script src="myhouse\Axis.js"></script> -->
+    <style>
+        html, body {
+            overflow: hidden;
+            width   : 100%;
+            height  : 100%;
+            margin  : 0;
+            padding : 0;
+        }
+
+        #renderCanvas {
+            width   : 100%;
+            height  : 100%;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        window.addEventListener('DOMContentLoaded', function(){
+            var canvas = document.getElementById('renderCanvas');
+            var engine = new BABYLON.Engine(canvas, true);
+            var createScene = function(){
+
+            //camera & light   
+                var scene = new BABYLON.Scene(engine);               
+                var camera = new BABYLON.ArcRotateCamera('camera1', new BABYLON.Vector3(0,0,0), scene);
+                camera.setPosition(new BABYLON.Vector3(15, 0, 5));
+                camera.attachControl(canvas, true);
+                camera.upperRadiusLimit = 100;
+                camera.upperBetaLimit = Math.PI/2;
+                var light = new BABYLON.HemisphericLight("HemiLight", new BABYLON.Vector3(1, 0.5, 0.5), scene);
+                light.intensity = 0.6;
+
+            //skybox
+                var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:200.0}, scene);
+                var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+                skyboxMaterial.backFaceCulling = false;
+                skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("texture/skybox4", scene);
+                skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+                skyboxMaterial.disableLighting = true;
+                skyboxMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1);
+                skyboxMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
+                skybox.material = skyboxMaterial;
+
+            //ground
+                var ground = BABYLON.MeshBuilder.CreateGround("gd", {width: 200, height: 200}, scene);
+                ground.position.y = -6.9;
+                var groundMat = new BABYLON.StandardMaterial("groundMat", scene);
+                var groundTexture = new BABYLON.Texture("texture/skybox4_ny.jpg", scene);
+                groundMat.diffuseTexture = groundTexture;
+                groundMat.emissiveColor = new BABYLON.Color3(1, 1, 1); 
+                groundMat.disableLighting = true;
+                ground.material = groundMat;
+
+            //meshbuild
+                var faceColors = new Array(6);
+                for(var i = 0; i < 6; i++){
+                    faceColors[i] = new BABYLON.Color3(0.3, 0.3, 0.3);
+                }
+                var head = BABYLON.MeshBuilder.CreateBox("head", {height: 1.2, width: 1.3, depth: 1.3, faceColors: faceColors}, scene);
+                var body = BABYLON.MeshBuilder.CreateBox("body", {height: 2.3, width: 0.7, depth: 1, faceColors: faceColors}, scene);
+                var leg1 = BABYLON.MeshBuilder.CreateBox("leg1", {height: 4, width: 0.3, depth: 0.3, faceColors: faceColors}, scene);
+                var leg2 = leg1.clone("leg2");
+                var hand1 = BABYLON.MeshBuilder.CreateBox("hand1", {height: 5.5, width: 0.3, depth: 0.3, faceColors: faceColors}, scene);
+                var hand2 = hand1.clone("hand2");
+
+                body.position.y = -1.75;
+                leg1.position = new BABYLON.Vector3(0, -4.9, 0.3);
+                leg2.position = new BABYLON.Vector3(0, -4.9, -0.3);
+                hand1.setPivotMatrix(BABYLON.Matrix.Translation(0, -2.5, -0.175),false);   
+                hand1.position = new BABYLON.Vector3(0, -1, -0.475);
+                hand1.rotation.z = Math.PI/6;     
+                hand2.setPivotMatrix(BABYLON.Matrix.Translation(0, -2.5, 0.175),false);    
+                hand2.position = new BABYLON.Vector3(0, -1, 0.475);
+                hand2.rotation.z = Math.PI/6;
+
+            //eyes
+                var rightEye = new BABYLON.Mesh("rightEye", scene);
+                var positions = [
+                    0.651, -0.2, -0.15,   0.651, -0.2, -0.34,   0.651, -0.2, -0.44,   0.651, -0.2, -0.63,
+                    0.651, -0.08, -0.63,   0.651, -0.08, -0.44,   0.651, -0.08, -0.34,   0.651, -0.08, -0.15,
+                    0.651, -0.2, -0.34,   0.651, -0.2, -0.44,   0.651, -0.08, -0.44,   0.651, -0.08, -0.34
+                    ]; 
+                var colors = [
+                    1, 1, 1, 1,             1, 1, 1, 1,             1, 1, 1, 1,             1, 1, 1, 1,
+                    1, 1, 1, 1,             1, 1, 1, 1,             1, 1, 1, 1,             1, 1, 1, 1, 
+                    0.93, 0.51, 0.93, 1,    0.93, 0.51, 0.93, 1,    0.93, 0.51, 0.93, 1,    0.93, 0.51, 0.93, 1
+                    ];
+                var indices = [0, 6, 1,    0, 7, 6,    2, 4, 3,    2, 5, 4,    8, 10, 9,   8, 11, 10];
+                var vertexData = new BABYLON.VertexData(); 
+                vertexData.positions = positions; 
+                vertexData.colors = colors;
+                vertexData.indices = indices;
+                vertexData.applyToMesh(rightEye);
+                var leftEye = rightEye.clone("leftEye");
+                leftEye.position.z = 0.78;
+
+            // grassBox
+                var mat = new BABYLON.StandardMaterial("mat", scene);
+                var texture = new BABYLON.Texture("texture/grassblock.jpg", scene);
+                mat.diffuseTexture = texture;
+                var faceUV = new Array(6);
+                for(var i = 0; i < 4; i++){ 
+                    faceUV[i] = new BABYLON.Vector4(0, 0, 1/3, 1); 
+                }
+                faceUV[4] = new BABYLON.Vector4(1/3, 0, 2/3, 1); 
+                faceUV[5] = new BABYLON.Vector4(2/3, 0, 1, 1); 
+                var grassBox = BABYLON.MeshBuilder.CreateBox("grassBox", {faceUV: faceUV, wrap: true}, scene);
+                grassBox.position = new BABYLON.Vector3(2.5, -5.3, 0);
+                grassBox.rotation.z = -Math.PI/6;
+                grassBox.material = mat;
+
+            //Axis
+                // var s = document.getElementsByTagName("script")[1];
+                // s.onload = function() {
+                //     showAxis(10, scene);
+                // }();
+
+            //particles  
+                var particleSystem = new BABYLON.ParticleSystem('snow', 100, scene);
+                particleSystem.particleTexture = new BABYLON.Texture("texture/snow.png", scene);
+                particleSystem.emitter = body;
+                particleSystem.particleEmitterType = new BABYLON.CylinderDirectedParticleEmitter(4,8,0.75, new BABYLON.Vector3(0,-1,0), new BABYLON.Vector3(0,-1,0));  
+                particleSystem.minSize = 0.1;
+                particleSystem.maxSize = 0.5;
+                particleSystem.minLifeTime = 2;
+                particleSystem.maxLifeTime = 2.5;
+                particleSystem.emitRate = 8;
+                particleSystem.direction1 = new BABYLON.Vector3(0, -1, 0);
+                particleSystem.minEmitPower = 2; 
+                particleSystem.maxEmitPower = 2;
+                particleSystem.updateSpeed = 0.005;
+                particleSystem.start(); 
+           
+                scene.debugLayer.show();
+
+                return scene;
+            };   
+            var scene = createScene();
+            engine.runRenderLoop(function(){
+                scene.render();
+            });
+            window.addEventListener('resize', function(){
+                engine.resize();
+            });
+        });
+    </script>
+    
+</body>
+</html>
